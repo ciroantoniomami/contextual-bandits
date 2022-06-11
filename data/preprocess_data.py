@@ -38,6 +38,7 @@ def feature_extraction(data):
 
     # streaming_batch: the result for testing bandit algrorithms
     top50_data = data[data['movie_id'].isin(actions)]
+    top50_data['movie_id'] = top50_data['movie_id'].apply(lambda x: actions.index(x))
     top50_data = top50_data.sort_values('timestamp', ascending=True)
     streaming_batch = top50_data['user_id']
 
@@ -67,6 +68,7 @@ def main():
     reward_list.to_csv("reward_list.csv", sep='\t', index=False)
 
     action_context = movie[movie['movie_id'].isin(actions)]
+    action_context['movie_id'] = action_context['movie_id'].apply(lambda x: actions.index(x))
     action_context.to_csv("action_context.csv", sep='\t', index = False)
 
 if __name__ == '__main__':
