@@ -1,14 +1,13 @@
 import numpy as np 
 
 
-class LinSDisjoint(object):
+class LinUCB(object):
 
 
     def __init__(self, alpha, d, K, T, lambda_, value):
         self.alpha = alpha
         self.d = d
         self.K = K
-        self.Boolean = [False] * K
         self.T = T
         self.lambda_ = lambda_
         self.value = value
@@ -31,7 +30,7 @@ class LinSDisjoint(object):
 
 
 
-    def _get_action(self, mtx_content, A, b):
+    def _get_action(self, mtx_content, A):
         """Compute S and Select action with max S """
         S = np.zeros(self.K, dtype = np.int8)
         
