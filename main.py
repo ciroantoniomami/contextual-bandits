@@ -1,21 +1,42 @@
-import pandas as pd
-import numpy as np
 import random
+
+from matplotlib import pyplot as plt
 from LInUCB import *
+from Exp4 import exp4
+from utils import get_data, training_data, train_expert, compute_regret
 
 
-def get_data():
-    streaming_batch = pd.read_csv('data/streaming_batch.csv', sep='\t', names=['user_id'], engine='c')
-    user_feature = pd.read_csv('data/user_feature.csv', sep='\t', header=0,index_col=0, engine='c')
-    actions_id = list(pd.read_csv('data/actions.csv', sep='\t', header=0,engine='c')['movie_id'])
-    reward_list = pd.read_csv('data/reward_list.csv', sep='\t', header=0,engine='c')
-    action_context = pd.read_csv('data/action_context.csv', sep='\t', engine='c')
-    return streaming_batch, user_feature, reward_list, action_context
+def main_exp4():
+    streaming_batch, user_feature, reward_list, action_context = get_data()
+    X, y = training_data(user_feature, reward_list, streaming_batch, 1000)
+    experts = train_expert(X, y)
+    T = 10000
+    d = 18
+    M = 2
+    K = 50
+    eta = 0.4
+    gamma = 0.4
+    bandit = exp4(T, d, M, K, eta, gamma)
+    seq_error = np.full(T, 0)
+    for t in range(T - 1):
+        feature_user = np.array(user_feature[user_feature.index == int(streaming_batch.iloc[t + 1, 0])])
+        watched_list = reward_list[reward_list['user_id'] == int(streaming_batch.iloc[t + 1, 0])]
+        optimal_action, P, E = bandit.get_action(feature_user, experts)
+        if optimal_action not in list(watched_list['movie_id']):
+            reward = 0.0
+            regret = 1.0
+        else:
+            reward = 1.0
+            regret = 0.0
 
-def compute_regret(seq_error):
-    t = len(seq_error)
-    regret = [x / y for x, y in zip(seq_error, range(1, t + 1))]
-    return regret
+        if t == 0:
+            seq_error[t] = regret
+        else:
+            seq_error[t] = seq_error[t - 1] + regret
+
+        bandit.update(optimal_action, reward, E, P)
+    cumulative_regret = compute_regret(seq_error)
+    return cumulative_regret, seq_error[T - 10:T + 10]
 
 def main():
 
@@ -58,5 +79,6 @@ def main():
 
 
 if __name__ == "__main__":
-    avg_r, r  = main()
-    print(r)
+    avg_r, r  = main_exp4()
+    plt.plot(avg_r)
+    plt.show()
