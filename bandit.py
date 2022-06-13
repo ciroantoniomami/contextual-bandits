@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 import numpy as np
 
 
@@ -7,12 +9,10 @@ class Bandit():
     def __init__(self,
                  T: int,
                  d: int,
-                 alpha: float,
                  K: int,
     ) -> None:
         self.T = T
         self.d = d
-        self.alpha = alpha
         self. K = K
 
     def get_action(self,
