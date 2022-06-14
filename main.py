@@ -56,7 +56,7 @@ def main():
         feature_user = np.array(user_feature[user_feature.index == int(streaming_batch.iloc[t+1, 0])])
         context = feature_user * action_context
         watched_list = reward_list[reward_list['user_id'] == int(streaming_batch.iloc[t+1, 0])]
-        optimal_action = bandit._get_action(context)
+        optimal_action = bandit.get_action(context)
         optimal_action = random.randint(0, 49)
         
         if optimal_action not in list(watched_list['movie_id']):
@@ -71,8 +71,7 @@ def main():
         else:
                 seq_error[t] = seq_error[t-1] + regret
 
-        bandit._update(reward, context, optimal_action)
-        
+        bandit.update(reward, context, optimal_action)
     
     cumulative_regret = compute_regret(seq_error)
     return cumulative_regret, seq_error[T-10:T+10]
