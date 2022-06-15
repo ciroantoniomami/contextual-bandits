@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.naive_bayes import MultinomialNB
-
+from sklearn.ensemble import RandomForestClassifier
 
 def get_data():
     streaming_batch = pd.read_csv('data/streaming_batch.csv', sep='\t', header=0,names=['user_id'], engine='c')
@@ -24,13 +24,12 @@ def training_data(
                   streaming_batch: pd.DataFrame,
                   num_samples: int,
 )-> (np.array, np.array):
-    user = np.unique(np.array(streaming_batch))
-    samples = np.random.choice(user, size=num_samples, replace=True)
+    user = np.array(streaming_batch)[:num_samples]
     X = []
     y = []
-    for idx in samples:
-        feature_user = np.array(user_feature[user_feature.index == idx]).squeeze(0)
-        watched_list = reward_list[reward_list['user_id'] == idx]
+    for idx in user:
+        feature_user = np.array(user_feature[user_feature.index == idx[0]]).squeeze(0)
+        watched_list = reward_list[reward_list['user_id'] == idx[0]]
         if len(watched_list) == 0:
             continue
         X.append(feature_user)
@@ -41,6 +40,8 @@ def training_data(
 def train_expert(X, y):
     logreg = OneVsRestClassifier(LogisticRegression())
     mnb = OneVsRestClassifier(MultinomialNB())
+    rf = OneVsRestClassifier(RandomForestClassifier())
     logreg.fit(X, y)
     mnb.fit(X, y)
-    return [logreg, mnb]
+    rf.fit(X,y)
+    return [logreg, mnb, rf]

@@ -27,7 +27,7 @@ def movie_preprocessing(movie):
 
 def feature_extraction(data):
     # actions: we use top 50 movies as our actions for recommendations
-    actions = data.groupby('movie_id').size().sort_values(ascending=False)[:50]
+    actions = data.groupby('movie_id').size().sort_values(ascending=False)[:10]
     actions = list(actions.index)
 
     # user_feature: tags they've watched for non-top-50 movies normalized per user
@@ -41,6 +41,7 @@ def feature_extraction(data):
     top50_data['movie_id'] = top50_data['movie_id'].apply(lambda x: actions.index(x))
     top50_data = top50_data.sort_values('timestamp', ascending=True)
     streaming_batch = top50_data['user_id']
+    streaming_batch = streaming_batch.sample(frac=1, random_state=91298)
 
     # reward_list: if rating >=3, the user will watch the movie
     top50_data['reward'] = np.where(top50_data['rating'] >= 3, 1, 0)

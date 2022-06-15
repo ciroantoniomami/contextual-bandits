@@ -27,7 +27,7 @@ class exp4(Bandit):
         for idx, e in enumerate(experts):
             E[idx,:] = e.predict_proba(context)
         P = self.Q.dot(E)
-        action = np.random.choice(np.arange(50), size=1, p=P)
+        action = np.random.choice(np.arange(self.K), size=1, p=P)
 
         return action, P, E
 
