@@ -51,6 +51,7 @@ def main():
     # read and preprocess the movie data
     movie = pd.read_table('movies.dat', sep='::', names=['movie_id', 'movie_name', 'tag'], engine='python',
                           encoding="ISO-8859-1")
+    
     movie = movie_preprocessing(movie)
 
     # read the ratings data and merge it with movie data
