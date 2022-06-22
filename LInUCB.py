@@ -59,7 +59,7 @@ if __name__ == '__main__':
     alpha = 0.3
     lambda_ = 1
     seq_error = np.full(T, 0)
-    bandit = LinUCB(alpha, D, T, K, lambda_)
+    bandit = LinUCB(alpha, D, T, K, lambda_, disjoint=False)
 
     for t in tqdm(range(0, T - 1)):
         feature_user = np.array(user_feature[user_feature.index == int(streaming_batch.iloc[t + 1, 0])])
