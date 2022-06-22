@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 import numpy as np
-from main import get_data, compute_regret
+from utils import get_data, compute_regret
 
 class LinTS(object):
 
