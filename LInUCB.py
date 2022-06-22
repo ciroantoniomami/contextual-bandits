@@ -7,32 +7,46 @@ from utils import get_data, compute_regret
 
 class LinUCB(object):
 
-    def __init__(self, alpha, d, T, K, lambda_):
+    def __init__(self, alpha, d, T, K, lambda_, disjoint):
         self.alpha = alpha
         self.d = d
         self.T = T
         self.K = K
         self.lambda_ = lambda_
-        self.A = lambda_ * np.identity(self.d)
-        self.b = np.zeros((self.d))
+        self.disjoint = disjoint
+        if self.disjoint:
+            self.A = [lambda_ * np.identity(self.d) for _ in range(self.K)]
+            self.b = [np.zeros(self.d) for _ in range(self.K)]
+        else:
+            self.A = lambda_ * np.identity(self.d)
+            self.b = np.zeros((self.d))
 
     def get_action(self, mtx_content):
         """Compute S and Select action with max S """
         S = np.zeros(self.K)
-        A_inv = np.linalg.inv(self.A)
-        theta = A_inv.dot(self.b)
         
-        for ii in range(self.K):
-            S[ii] = theta.dot(mtx_content[ii]) + self.alpha*np.sqrt(mtx_content[ii].T.dot(A_inv).dot(mtx_content[ii]))
+        if self.disjoint:
+            for ii in range(self.K):
+                A_inv = np.linalg.inv(self.A[ii])
+                theta = A_inv.dot(self.b[ii])
+                S[ii] += theta.dot(mtx_content[ii]) + self.alpha*np.sqrt(mtx_content[ii].T.dot(A_inv).dot(mtx_content[ii]))
+        else:
+            A_inv = np.linalg.inv(self.A)
+            theta = A_inv.dot(self.b)
+            for ii in range(self.K):
+                S[ii] += theta.dot(mtx_content[ii]) + self.alpha*np.sqrt(mtx_content[ii].T.dot(A_inv).dot(mtx_content[ii]))
 
         optimal_action = np.argmax(S)   
         return optimal_action
 
     def update(self, reward, mtx_content, optimal_action):
         """ Update matrix A and vector b."""
-        self.A += mtx_content[optimal_action].dot(mtx_content[optimal_action].T)
-        self.b += reward *  mtx_content[optimal_action]
-        return self.A, self.b
+        if self.disjoint:
+            self.A[optimal_action] += mtx_content[optimal_action].dot(mtx_content[optimal_action].T)
+            self.b[optimal_action] += reward *  mtx_content[optimal_action]
+        else:
+            self.A += mtx_content[optimal_action].dot(mtx_content[optimal_action].T)
+            self.b += reward *  mtx_content[optimal_action]
 
 if __name__ == '__main__':
     streaming_batch, user_feature, reward_list, action_context = get_data()
