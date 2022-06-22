@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.multiclass import OneVsRestClassifier
+from sklearn.multioutput import MultiOutputClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.ensemble import RandomForestClassifier
 
@@ -30,17 +30,17 @@ def training_data(
     for idx in user:
         feature_user = np.array(user_feature[user_feature.index == idx[0]]).squeeze(0)
         watched_list = reward_list[reward_list['user_id'] == idx[0]]
-        if len(watched_list) == 0:
-            continue
+        r = np.zeros(10)
+        r[watched_list['movie_id']] = 1
         X.append(feature_user)
-        y.append(int(watched_list['movie_id'].sample()))
+        y.append(r)
 
     return  np.array(X), np.array(y)
 
 def train_expert(X, y):
-    logreg = OneVsRestClassifier(LogisticRegression())
-    mnb = OneVsRestClassifier(MultinomialNB())
-    rf = OneVsRestClassifier(RandomForestClassifier())
+    logreg = MultiOutputClassifier(LogisticRegression())
+    mnb = MultiOutputClassifier(MultinomialNB())
+    rf = MultiOutputClassifier(RandomForestClassifier())
     logreg.fit(X, y)
     mnb.fit(X, y)
     rf.fit(X,y)
