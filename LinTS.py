@@ -5,12 +5,11 @@ from main import get_data, compute_regret
 
 class LinTS(object):
 
-    def __init__(self, R: float, epsilon: float, delta: float, D: int, K: int) -> None:
+    def __init__(self, R: float, delta: float, D: int, K: int) -> None:
         if delta <= 0 or delta > 1:
             raise ValueError(f"Delta should be in (0,1]. Passed parameter was {delta}")
 
         self.R = R
-        self.epsilon = epsilon
         self.delta = delta
         self.D = D
         self.B = np.identity(D)
@@ -19,7 +18,7 @@ class LinTS(object):
         self.K = K
 
     def get_action(self, mtx_content: np.array,  t_step: int):
-        v = self.R * np.sqrt(24 / self.epsilon * self.D * np.log((t_step+1) / self.delta))
+        v = self.R * np.sqrt(9 * self.D * np.log((t_step+1) / self.delta))
         cov_matrix = v**2 * np.linalg.inv(self.B)
 
         u = np.random.multivariate_normal(mean=self.mu, cov=cov_matrix, size=1).reshape(self.D, 1)
@@ -45,9 +44,8 @@ if __name__ == "__main__":
 
     delta = 0.1
     R = 0.3
-    epsilon = 1 / np.log(T)
 
-    bandit = LinTS(R=R, epsilon=epsilon, delta=delta, D=D, K=K)
+    bandit = LinTS(R=R, delta=delta, D=D, K=K)
 
     seq_error = np.full(T,0)
     for t in range(0, T-1):
