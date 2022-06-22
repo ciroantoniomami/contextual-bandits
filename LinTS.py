@@ -6,8 +6,6 @@ from main import get_data, compute_regret
 class LinTS(object):
 
     def __init__(self, R: float, epsilon: float, delta: float, D: int, K: int) -> None:
-        if epsilon <= 0 or epsilon >= 1:
-            raise ValueError(f"Epsilon should be in (0,1). Passed parameter was {epsilon}")
         if delta <= 0 or delta > 1:
             raise ValueError(f"Delta should be in (0,1]. Passed parameter was {delta}")
 
@@ -25,8 +23,6 @@ class LinTS(object):
         cov_matrix = v**2 * np.linalg.inv(self.B)
 
         u = np.random.multivariate_normal(mean=self.mu, cov=cov_matrix, size=1).reshape(self.D, 1)
-
-        print(cov_matrix)
 
         S = np.zeros(self.K)
         for ii in range(self.K):
