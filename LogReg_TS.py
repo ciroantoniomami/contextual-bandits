@@ -37,20 +37,9 @@ class LogReg_TS(object):
         except AttributeError:
             self.q = self.q + (P*(1-P)) * (X ** 2)
             
-    def predict_proba(self, X, mode='sample'):
-        # sampling weights after update
+    def predict_proba(self, X):
         self.w = self.get_weights()
-        
-        # using weight depending on mode
-        if mode == 'sample':
-            w = self.w # weights are samples of posteriors
-        elif mode == 'expected':
-            w = self.m # weights are expected values of posteriors
-        else:
-            raise Exception('mode not recognized!')
-        
-        # calculating probabilities
-        proba = 1 / (1 + np.exp(-1 * X.dot(w)))
+        proba = 1 / (1 + np.exp(-1 * X.dot(self.w)))
         return np.array([proba]).T
 
     def get_action(self, mtx_content):
